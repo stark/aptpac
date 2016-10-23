@@ -12,70 +12,86 @@
 # a pacman wrapper with syntax based on debian's apt
 # (c) arcetera 2015 - wtfpl
 
-SYNTAX=$1
-INPUT=$2
+SYNTAX="$1"
+INPUT="$2"
 
-if [ "$SYNTAX" == "install" ]
-then
-        sudo pacman -S $INPUT
-elif [ "$SYNTAX" == "search" ]
-then
-        pacman -Ss $INPUT
-elif [ "$SYNTAX" == "remove" ]
-then
-        sudo pacman -Rs $INPUT
-elif [ "$SYNTAX" == "upgrade" ]
-then
-        sudo pacman -Syu
-elif [ "$SYNTAX" == "update" ]
-then
-        sudo pacman -Sy
-        echo "run aptpac upgrade *immediately*. pacman does not support partial upgrades. running merely 'upgrade' would suffice. failure to do this could result in a broken installation."
-elif [ "$SYNTAX" == "download" ]
-then
-        sudo pacman -Sw $INPUT
-elif [ "$SYNTAX" == "autoremove" ]
-then
-        sudo pacman -Qdtq | pacman -Rs -
-elif [ "$SYNTAX" == "show" ]
-then
-        pacman -Qi $INPUT
-elif [ "$SYNTAX" == "clean" ]
-then
-        sudo pacman -Sc
-elif [ "$SYNTAX" == "autoclean" ]
-then
-        sudo pacman -Sc
-elif [ "$SYNTAX" == "policy" ]
-then
-        less /etc/pacman.d/mirrorlist
-elif [ "$SYNTAX" == "list" ]
-then
-        pacman -Q
-elif [ "$SYNTAX" == "listmore" ]
-then
-        pacman -Qi
-elif [ "$SYNTAX" == "listless" ]
-then
-        pacman -Q | wc -l
-elif [ "$SYNTAX" == "build" ]
-then
-        makepkg -sri
-else
-        echo "aptpac: a pacman wrapper with apt syntax"
-        echo "no argument/invalid argument - print this help"
-        echo "install - installs a package"
-        echo "search - searches for a package in the repos"
-        echo "remove - removes a package"
-        echo "upgrade - upgrades the system fully, refreshing repos and upgrading packages"
-        echo "update - only refreshes the repos (bad practice, do not run this without running 'upgrade' immediately after"
-        echo "download - only download a package into pacman's cache without installing it"
-        echo "autoremove - remove dependencies that are no longer needed (usually should not be needed as 'remove' should remove dependencies along with the package)"
-        echo "show - shows information about the package"
-        echo "clean/autoclean - clears pacman's cache"
-        echo "policy - prints mirrorlist"
-        echo "list - lists all installed packages"
-        echo "listmore - lists all installed packages with all info"
-        echo "listless - lists how many packages are installed"
-        echo "build - builds package from PKGBUILD"
-fi
+_usage() {
+	cat <<- EOF
+    $(basename $0): a pacman wrapper with apt syntax
+
+    no argument/invalid argument - print this help
+    install    - installs a package
+    search     - searches for a package in the repos
+    remove     - removes a package
+    upgrade    - upgrades the system fully, refreshing repos and upgrading packages
+    update     - only refreshes the repos (bad practice, do not run this without running 'upgrade' immediately after
+    download   - only download a package into pacman's cache without installing it
+    autoremove - remove dependencies that are no longer needed
+                 (usually should not be needed as 'remove' should remove dependencies along with the package)
+    show       - shows information about the package
+    clean      - clears pacman's cache
+    autoclean  - clears pacman's cache (same as clean)
+    policy     - prints mirrorlist
+    list       - lists all installed packages
+    listmore   - lists all installed packages with all info
+    listless   - lists how many packages are installed
+    build      - builds package from PKGBUILD
+	EOF
+}
+
+case "$SYNTAX" in
+	install)
+		sudo pacman -S $INPUT
+		;;
+	search)
+		pacman -Ss $INPUT
+		;;
+	remove)
+		sudo pacman -Rs $INPUT
+		;;
+	upgrade)
+		sudo pacman -Syu
+		;;
+	update)
+		sudo pacman -Sy
+		echo 'run aptpac upgrade *immediately*.'
+		echo 'pacman does not support partial upgrades.'
+		echo 'running merely 'upgrade' would suffice.'
+		echo 'failure to do so could result in a broken installation.'
+		;;
+	download)
+		sudo pacman -Sw $INPUT
+		;;
+	autoremove)
+		sudo pacman -Qdtq | pacman -Rs -
+		;;
+	show)
+		pacman -Qi $INPUT
+		;;
+	clean)
+		sudo pacman -Sc
+		;;
+	autoclean)
+		sudo pacman -Sc
+		;;
+	policy)
+		less /etc/pacman.d/mirrorlist
+		;;
+	list)
+		pacman -Q
+		;;
+	listmore)
+		pacman -Qi
+		;;
+	listless)
+		pacman -Q | wc -l
+		;;
+	build)
+                makepkg -sri
+		;;
+		*)
+		_usage && exit 1
+		;;
+esac
+
+exit 0
